@@ -18,7 +18,7 @@ kills = 0
 
 player_health = 10
 last_damage_time = 0
-damage_interval = 0.2
+damage_interval = 0
 
 enemies = []
 enemies_spawn_time = 0
@@ -108,6 +108,10 @@ while running:
             pygame.draw.rect(screen, green, start_button, 3)
             if click[0]:
                 game_state = "playing"
+                kills = 0
+                player_health = 10
+                pygame.mixer.music.load('background_music.wav')
+                pygame.mixer.music.play(-1)
         else:
             pygame.draw.rect(screen, white, start_button, 3)
 
@@ -196,10 +200,10 @@ while running:
                 last_damage_time = pygame.time.get_ticks()
                 for enemy in enemies:
                     if pygame.Vector2(enemy).distance_to(player_position) < 25:
-                        enemies.remove(enemy)
                         player_health -= 1
                         pygame.mixer.Sound.play(damage_sound)
                     if player_health == 0:
+                        enemies.remove(enemy)
                         game_state = "game_over"
 
     health_text = font.render(f"Health: {player_health}", True, (255, 255, 255))
