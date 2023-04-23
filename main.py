@@ -10,9 +10,9 @@ dt = 0
 
 player_position = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 projectiles = []
-projectile_speed = 700
+projectile_speed = 2000
 last_shot_time = 0
-shot_cooldown = 0.2
+shot_cooldown = 0
 
 kills = 0
 
@@ -44,6 +44,7 @@ white = (255, 255, 255)
 title_font = pygame.font.SysFont(None, 72)
 start_text = font.render("Start Game", True, black)
 quit_text = font.render("Quit", True, black)
+restart_text = font.render("Restart", True, black)
 
 game_over_title_font = pygame.font.SysFont(None, 72)
 game_over_text = game_over_title_font.render("Game Over", True, red)
@@ -51,13 +52,6 @@ game_over_text = game_over_title_font.render("Game Over", True, red)
 game_over_restart_button = pygame.Rect(screen.get_width() // 2 - 100, 300, 200, 50)
 game_over_quit_button = pygame.Rect(screen.get_width() // 2 - 100, 400, 200, 50)
 
-restart_text = font.render("Restart", True, black)
-quit_text = font.render("Quit", True, black)
-
-
-title_font = pygame.font.SysFont(None, 72)
-start_text = font.render("Start Game", True, black)
-quit_text = font.render("Quit", True, black)
 
 while running:
     for event in pygame.event.get():
@@ -91,7 +85,7 @@ while running:
             pygame.draw.rect(screen, white, quit_button, 3)
 
     elif game_state == "playing":
-        screen.fill("blue")
+        screen.fill(blue)
 
     if game_state == "game_over":
         screen.fill(blue)
@@ -99,8 +93,8 @@ while running:
         pygame.draw.rect(screen, white, game_over_restart_button)
         pygame.draw.rect(screen, white, game_over_quit_button)
 
-        screen.blit(kills_text, (screen.get_width() // 2 - title_text.get_width() // 2, 100))
-        screen.blit(restart_text, (game_over_restart_button.centerx - start_text.get_width() // 2, start_button.centery - start_text.get_height() // 2))
+        screen.blit(kills_text, (screen.get_width() // 2 - kills_text.get_width() // 2, 250))
+        screen.blit(restart_text, (game_over_restart_button.centerx - restart_text.get_width() // 2, start_button.centery - start_text.get_height() // 2))
         screen.blit(quit_text, (quit_button.centerx - quit_text.get_width() // 2, quit_button.centery - quit_text.get_height() // 2))
 
         mouse = pygame.mouse.get_pos()
@@ -121,7 +115,7 @@ while running:
             pygame.draw.rect(screen, white, quit_button, 3)
 
     elif game_state == "playing":
-        screen.fill("blue")
+        screen.fill(blue)
 
     player = pygame.draw.circle(screen, "red", player_position, 40)
 
@@ -193,8 +187,8 @@ while running:
                     if pygame.Vector2(enemy).distance_to(player_position) < 25:
                         enemies.remove(enemy)
                         player_health -= 1
-                if player_health == 0:
-                    game_state = "game_over"
+                    if player_health == 0:
+                        game_state = "game_over"
 
     health_text = font.render(f"Health: {player_health}", True, (255, 255, 255))
     kills_text = font.render(f"Kills: {kills}", True, (255, 255, 255))
