@@ -18,7 +18,7 @@ kills = 0
 
 player_health = 10
 last_damage_time = 0
-damage_interval = 1.0
+damage_interval = 0.2
 
 enemies = []
 enemies_spawn_time = 0
@@ -53,7 +53,6 @@ game_over_quit_button = pygame.Rect(screen.get_width() // 2 - 100, 400, 200, 50)
 
 restart_text = font.render("Restart", True, black)
 quit_text = font.render("Quit", True, black)
-
 
 
 title_font = pygame.font.SysFont(None, 72)
@@ -186,12 +185,14 @@ while running:
             pygame.draw.circle(screen,(0, 0, 0), enemy, 29)
             pygame.draw.circle(screen, "yellow", enemy, 25)
 
-
         if pygame.math.Vector2.distance_to(player_position, enemy) < 40 :
             time_since_last_damage = pygame.time.get_ticks() - last_damage_time
             if time_since_last_damage >= damage_interval * 1000 and not game_state == "menu":
-                player_health -= 1
                 last_damage_time = pygame.time.get_ticks()
+                for enemy in enemies:
+                    if pygame.Vector2(enemy).distance_to(player_position) < 25:
+                        enemies.remove(enemy)
+                        player_health -= 1
                 if player_health == 0:
                     game_state = "game_over"
 
@@ -203,6 +204,6 @@ while running:
 
     pygame.display.flip()
 
-    dt = clock.tick(120)  / 1000
+    dt = clock.tick(120) / 1000
 
 pygame.quit()
