@@ -1,5 +1,4 @@
 import random
-
 import pygame
 
 
@@ -46,6 +45,21 @@ title_font = pygame.font.SysFont(None, 72)
 start_text = font.render("Start Game", True, black)
 quit_text = font.render("Quit", True, black)
 
+game_over_title_font = pygame.font.SysFont(None, 72)
+game_over_text = game_over_title_font.render("Game Over", True, red)
+
+game_over_restart_button = pygame.Rect(screen.get_width() // 2 - 100, 300, 200, 50)
+game_over_quit_button = pygame.Rect(screen.get_width() // 2 - 100, 400, 200, 50)
+
+restart_text = font.render("Restart", True, black)
+quit_text = font.render("Quit", True, black)
+
+
+
+title_font = pygame.font.SysFont(None, 72)
+start_text = font.render("Start Game", True, black)
+quit_text = font.render("Quit", True, black)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -80,26 +94,56 @@ while running:
     elif game_state == "playing":
         screen.fill("blue")
 
+    if game_state == "game_over":
+        screen.fill(blue)
+
+        pygame.draw.rect(screen, white, game_over_restart_button)
+        pygame.draw.rect(screen, white, game_over_quit_button)
+
+        screen.blit(kills_text, (screen.get_width() // 2 - title_text.get_width() // 2, 100))
+        screen.blit(restart_text, (game_over_restart_button.centerx - start_text.get_width() // 2, start_button.centery - start_text.get_height() // 2))
+        screen.blit(quit_text, (quit_button.centerx - quit_text.get_width() // 2, quit_button.centery - quit_text.get_height() // 2))
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+
+        if game_over_restart_button.collidepoint(mouse):
+            pygame.draw.rect(screen, green, start_button, 3)
+            if click[0]:
+                game_state = "playing"
+        else:
+            pygame.draw.rect(screen, white, start_button, 3)
+
+        if game_over_quit_button.collidepoint(mouse):
+            pygame.draw.rect(screen, red, quit_button, 3)
+            if click[0]:
+                running = False
+        else:
+            pygame.draw.rect(screen, white, quit_button, 3)
+
+    elif game_state == "playing":
+        screen.fill("blue")
+
     player = pygame.draw.circle(screen, "red", player_position, 40)
 
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_position = pygame.mouse.get_pos()
 
-    if keys[pygame.K_w]:
+    if keys[pygame.K_w] and not game_state == "menu":
         player_position.y -= 300 *dt
-    if keys[pygame.K_s]:
+    if keys[pygame.K_s] and not game_state == "menu":
         player_position.y += 300 *dt
-    if keys[pygame.K_a]:
+    if keys[pygame.K_a] and not game_state == "menu":
         player_position.x -= 300 * dt
-    if keys[pygame.K_d]:
+    if keys[pygame.K_d] and not game_state == "menu":
         player_position.x += 300 * dt
 
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
 
     time_since_last_shot = pygame.time.get_ticks() - last_shot_time
-    if mouse[0] and time_since_last_shot >= shot_cooldown * 1000:
+    if mouse[0] and time_since_last_shot >= shot_cooldown * 1000 and not game_state == "menu":
         projectile_position = pygame.Vector2(player_position)
         direction = pygame.Vector2(mouse_position) - projectile_position
         direction.normalize_ip()
@@ -143,11 +187,13 @@ while running:
             pygame.draw.circle(screen, "yellow", enemy, 25)
 
 
-        if pygame.math.Vector2.distance_to(player_position, enemy) < 40:
+        if pygame.math.Vector2.distance_to(player_position, enemy) < 40 :
             time_since_last_damage = pygame.time.get_ticks() - last_damage_time
-            if time_since_last_damage>= damage_interval * 1000:
+            if time_since_last_damage >= damage_interval * 1000 and not game_state == "menu":
                 player_health -= 1
                 last_damage_time = pygame.time.get_ticks()
+                if player_health == 0:
+                    game_state = "game_over"
 
     health_text = font.render(f"Health: {player_health}", True, (255, 255, 255))
     kills_text = font.render(f"Kills: {kills}", True, (255, 255, 255))
