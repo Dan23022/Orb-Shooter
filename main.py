@@ -3,16 +3,16 @@ import pygame
 
 
 pygame.init()
-screen = pygame.display.set_mode((1920, 1080))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 running = True
 dt = 0
 
 player_position = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 projectiles = []
-projectile_speed = 2000
+projectile_speed = 700
 last_shot_time = 0
-shot_cooldown = 0
+shot_cooldown = 0.2
 
 kills = 0
 
@@ -52,6 +52,8 @@ game_over_text = game_over_title_font.render("Game Over", True, red)
 game_over_restart_button = pygame.Rect(screen.get_width() // 2 - 100, 300, 200, 50)
 game_over_quit_button = pygame.Rect(screen.get_width() // 2 - 100, 400, 200, 50)
 
+pygame.mixer.music.load('background_music.wav')
+pygame.mixer.music.play(-1)
 
 while running:
     for event in pygame.event.get():
@@ -74,6 +76,7 @@ while running:
             pygame.draw.rect(screen, green, start_button, 3)
             if click[0]:
                 game_state = "playing"
+
         else:
             pygame.draw.rect(screen, white, start_button, 3)
 
@@ -89,6 +92,7 @@ while running:
 
     if game_state == "game_over":
         screen.fill(blue)
+        pygame.mixer.music.stop()
 
         pygame.draw.rect(screen, white, game_over_restart_button)
         pygame.draw.rect(screen, white, game_over_quit_button)
@@ -119,33 +123,37 @@ while running:
 
     player = pygame.draw.circle(screen, "red", player_position, 40)
 
+    shoot_sound = pygame.mixer.Sound("shooting_sound.mp3")
+    damage_sound = pygame.mixer.Sound("take_damage.mp3")
+
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_position = pygame.mouse.get_pos()
 
-    if keys[pygame.K_w] and not game_state == "menu":
+    if keys[pygame.K_w] and game_state == "playing":
         player_position.y -= 300 *dt
-    if keys[pygame.K_s] and not game_state == "menu":
+    if keys[pygame.K_s] and game_state == "playing":
         player_position.y += 300 *dt
-    if keys[pygame.K_a] and not game_state == "menu":
+    if keys[pygame.K_a] and game_state == "playing":
         player_position.x -= 300 * dt
-    if keys[pygame.K_d] and not game_state == "menu":
+    if keys[pygame.K_d] and game_state == "playing":
         player_position.x += 300 * dt
 
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
 
     time_since_last_shot = pygame.time.get_ticks() - last_shot_time
-    if mouse[0] and time_since_last_shot >= shot_cooldown * 1000 and not game_state == "menu":
+    if mouse[0] and time_since_last_shot >= shot_cooldown * 1000 and game_state == "playing":
         projectile_position = pygame.Vector2(player_position)
         direction = pygame.Vector2(mouse_position) - projectile_position
         direction.normalize_ip()
         velocity = direction * projectile_speed
         projectiles.append((projectile_position, velocity))
         last_shot_time = pygame.time.get_ticks()
+        pygame.mixer.Sound.play(shoot_sound)
 
     time_since_last_enemy = pygame.time.get_ticks() - enemies_spawn_time
-    if time_since_last_enemy >= enemies_spawn_delay * 1000 and len(enemies) < max_enemies:
+    if time_since_last_enemy >= enemies_spawn_delay * 1000 and len(enemies) < max_enemies and game_state == "playing":
         if pygame.time.get_ticks() - last_enemy_death_time >= enemies_respawn_delay * 1000:
             enemy_position = pygame.Vector2(random.randint(0, screen.get_width()), random.randint(0, screen.get_height()))
             enemies.append(enemy_position)
@@ -155,11 +163,13 @@ while running:
         projectile_position, velocity = projectile
         projectile_position += velocity * dt
 
+
         if not screen.get_rect().collidepoint(projectile_position):
             projectiles.remove(projectile)
             continue
 
         pygame.draw.circle(screen, "green", projectile_position, 10)
+
 
         for enemy in enemies:
             if pygame.Vector2(enemy).distance_to(projectile_position) < 25:
@@ -176,6 +186,7 @@ while running:
             direction = player_position - enemy
             direction.normalize_ip()
             enemy += direction * 100 * dt
+
             pygame.draw.circle(screen,(0, 0, 0), enemy, 29)
             pygame.draw.circle(screen, "yellow", enemy, 25)
 
@@ -187,6 +198,7 @@ while running:
                     if pygame.Vector2(enemy).distance_to(player_position) < 25:
                         enemies.remove(enemy)
                         player_health -= 1
+                        pygame.mixer.Sound.play(damage_sound)
                     if player_health == 0:
                         game_state = "game_over"
 
@@ -198,6 +210,6 @@ while running:
 
     pygame.display.flip()
 
-    dt = clock.tick(120) / 1000
+    dt = clock.tick(60) / 1000
 
 pygame.quit()
