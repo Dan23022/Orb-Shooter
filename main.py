@@ -28,17 +28,57 @@ max_enemies = 25
 enemies_respawn_delay = 1.0
 last_enemy_death_time = 0
 
-
 font = pygame.font.SysFont(None, 32)
 
+game_state = "menu"
 
+start_button = pygame.Rect(screen.get_width() // 2 - 100, 300, 200, 50)
+quit_button = pygame.Rect(screen.get_width() // 2 - 100, 400, 200, 50)
+
+blue = (106, 159, 181)
+red = (191, 39, 33)
+green = (100, 200, 100)
+black = (0, 0, 0)
+yellow = (255, 255, 0)
+white = (255, 255, 255)
+
+title_font = pygame.font.SysFont(None, 72)
+start_text = font.render("Start Game", True, black)
+quit_text = font.render("Quit", True, black)
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    screen.fill("blue")
+    if game_state == "menu":
+        screen.fill(blue)
+        pygame.draw.rect(screen, white, start_button)
+        pygame.draw.rect(screen, white, quit_button)
+        title_text = title_font.render("Orb Shooter", True, white)
+        screen.blit(title_text, (screen.get_width() // 2 - title_text.get_width() // 2, 100))
+        screen.blit(start_text, (start_button.centerx - start_text.get_width() // 2, start_button.centery - start_text.get_height() // 2))
+        screen.blit(quit_text, (quit_button.centerx - quit_text.get_width() // 2, quit_button.centery - quit_text.get_height() // 2))
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+
+        if start_button.collidepoint(mouse):
+            pygame.draw.rect(screen, green, start_button, 3)
+            if click[0]:
+                game_state = "playing"
+        else:
+            pygame.draw.rect(screen, white, start_button, 3)
+
+        if quit_button.collidepoint(mouse):
+            pygame.draw.rect(screen, red, quit_button, 3)
+            if click[0]:
+                running = False
+        else:
+            pygame.draw.rect(screen, white, quit_button, 3)
+
+    elif game_state == "playing":
+        screen.fill("blue")
 
     player = pygame.draw.circle(screen, "red", player_position, 40)
 
@@ -95,11 +135,12 @@ while running:
                     pass
 
     for enemy in enemies:
-        direction = player_position - enemy
-        direction.normalize_ip()
-        enemy += direction * 100 * dt
-        pygame.draw.circle(screen,(0, 0, 0), enemy, 29)
-        pygame.draw.circle(screen, "yellow", enemy, 25)
+        if not game_state == "menu":
+            direction = player_position - enemy
+            direction.normalize_ip()
+            enemy += direction * 100 * dt
+            pygame.draw.circle(screen,(0, 0, 0), enemy, 29)
+            pygame.draw.circle(screen, "yellow", enemy, 25)
 
 
         if pygame.math.Vector2.distance_to(player_position, enemy) < 40:
