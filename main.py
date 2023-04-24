@@ -136,13 +136,13 @@ while running:
 
     if game_state == "playing":
         if keys[pygame.K_w]:
-            player_position.y -= 300 *dt
+            player_position.y -= 300 * dt
         if keys[pygame.K_s]:
-            player_position.y += 300 *dt
+            player_position.y += 300 * dt
         if keys[pygame.K_a]:
-            player_position.x -= 300 *dt
+            player_position.x -= 300 * dt
         if keys[pygame.K_d]:
-            player_position.x += 300 *dt
+            player_position.x += 300 * dt
 
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
