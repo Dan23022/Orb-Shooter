@@ -134,14 +134,30 @@ while running:
     mouse = pygame.mouse.get_pressed()
     mouse_position = pygame.mouse.get_pos()
 
-    if keys[pygame.K_w] and game_state == "playing":
-        player_position.y -= 300 *dt
-    if keys[pygame.K_s] and game_state == "playing":
-        player_position.y += 300 *dt
-    if keys[pygame.K_a] and game_state == "playing":
-        player_position.x -= 300 * dt
-    if keys[pygame.K_d] and game_state == "playing":
-        player_position.x += 300 * dt
+    if game_state == "playing":
+        is_touching_player = False
+        for event in pygame.event.get():
+            if event.type == pygame.FINGERDOWN:
+                touch_position = pygame.math.Vector2(event.x, event.y)
+                if touch_position.distance_to(player_position) < 50:
+                    is_touching_player = True
+            elif event.type == pygame.FINGERUP:
+                is_touching_player = False
+            elif event.type == pygame.FINGERMOTION:
+                if is_touching_player:
+                    player_position += pygame.math.Vector2(event.dx, event.dy) * dt * 300
+
+    if game_state == "playing":
+        if keys[pygame.K_w]:
+            player_position.y -= 300 *dt
+        if keys[pygame.K_s]:
+            player_position.y += 300 *dt
+        if keys[pygame.K_a]:
+            player_position.x -= 300 *dt
+        if keys[pygame.K_d]:
+            player_position.x += 300 *dt
+
+
 
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
@@ -167,13 +183,11 @@ while running:
         projectile_position, velocity = projectile
         projectile_position += velocity * dt
 
-
         if not screen.get_rect().collidepoint(projectile_position):
             projectiles.remove(projectile)
             continue
 
         pygame.draw.circle(screen, "green", projectile_position, 10)
-
 
         for enemy in enemies:
             if pygame.Vector2(enemy).distance_to(projectile_position) < 25:
@@ -191,7 +205,7 @@ while running:
             direction.normalize_ip()
             enemy += direction * 100 * dt
 
-            pygame.draw.circle(screen,(0, 0, 0), enemy, 29)
+            pygame.draw.circle(screen, (0, 0, 0), enemy, 29)
             pygame.draw.circle(screen, "yellow", enemy, 25)
 
         if pygame.math.Vector2.distance_to(player_position, enemy) < 40 :
