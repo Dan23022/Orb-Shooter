@@ -22,9 +22,9 @@ damage_interval = 0
 
 enemies = []
 enemies_spawn_time = 0
-enemies_spawn_delay = 1
+enemies_spawn_delay = 0
 max_enemies = 25
-enemies_respawn_delay = 1.0
+enemies_respawn_delay = 0.2
 last_enemy_death_time = 0
 
 font = pygame.font.SysFont(None, 32)
@@ -135,19 +135,6 @@ while running:
     mouse_position = pygame.mouse.get_pos()
 
     if game_state == "playing":
-        is_touching_player = False
-        for event in pygame.event.get():
-            if event.type == pygame.FINGERDOWN:
-                touch_position = pygame.math.Vector2(event.x, event.y)
-                if touch_position.distance_to(player_position) < 50:
-                    is_touching_player = True
-            elif event.type == pygame.FINGERUP:
-                is_touching_player = False
-            elif event.type == pygame.FINGERMOTION:
-                if is_touching_player:
-                    player_position += pygame.math.Vector2(event.dx, event.dy) * dt * 300
-
-    if game_state == "playing":
         if keys[pygame.K_w]:
             player_position.y -= 300 *dt
         if keys[pygame.K_s]:
@@ -157,10 +144,15 @@ while running:
         if keys[pygame.K_d]:
             player_position.x += 300 *dt
 
-
-
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
+
+    time_since_last_enemy = pygame.time.get_ticks() - enemies_spawn_time
+    if time_since_last_enemy >= enemies_spawn_delay * 1000 and len(enemies) < max_enemies and game_state == "playing":
+        if pygame.time.get_ticks() - last_enemy_death_time >= enemies_respawn_delay * 1000:
+            enemy_position = pygame.Vector2(random.randint(0, screen.get_width()), random.randint(0, screen.get_height()))
+            enemies.append(enemy_position)
+            enemy_spawn_time = pygame.time.get_ticks()
 
     time_since_last_shot = pygame.time.get_ticks() - last_shot_time
     if mouse[0] and time_since_last_shot >= shot_cooldown * 1000 and game_state == "playing":
@@ -203,7 +195,7 @@ while running:
         if not game_state == "menu":
             direction = player_position - enemy
             direction.normalize_ip()
-            enemy += direction * 100 * dt
+            enemy += direction * 200 * dt
 
             pygame.draw.circle(screen, (0, 0, 0), enemy, 29)
             pygame.draw.circle(screen, "yellow", enemy, 25)
