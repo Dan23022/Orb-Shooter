@@ -200,10 +200,11 @@ while running:
                 last_damage_time = pygame.time.get_ticks()
                 for enemy in enemies:
                     if pygame.Vector2(enemy).distance_to(player_position) < 25:
-                        player_health -= 1
+                        enemies.remove(enemy)
+                        if not player_health == 0:
+                            player_health -= 1
                         pygame.mixer.Sound.play(damage_sound)
                     if player_health == 0:
-                        enemies.remove(enemy)
                         game_state = "game_over"
 
     health_text = font.render(f"Health: {player_health}", True, (255, 255, 255))
