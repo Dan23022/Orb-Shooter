@@ -206,7 +206,6 @@ while running:
                 try:
                     projectiles.remove(projectile)
                 except:
-                    logging.CRITICAL('CRASH EVENT CAUGHT: projectile removal')
                     pass
 
     for enemy in enemies:
