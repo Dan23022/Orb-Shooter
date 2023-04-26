@@ -162,7 +162,7 @@ while running:
                 player_position.x += 300 * dt
 
     if keys[pygame.K_ESCAPE]:
-        pygame.quit()
+        quit()
 
     time_since_last_enemy = pygame.time.get_ticks() - enemies_spawn_time
     if time_since_last_enemy >= enemies_spawn_delay * 1000 and len(enemies) < max_enemies and game_state == "playing":
